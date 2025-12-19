@@ -1,9 +1,13 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useFocusEffect } from "expo-router";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import {
+  ExpoSpeechRecognitionModule,
+  useSpeechRecognitionEvent,
+} from "expo-speech-recognition";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import {
   LEVEL_OPTIONS,
@@ -14,6 +18,10 @@ import {
 export default function PracticeScreen() {
   const [targetLevel, setTargetLevel] = useState<LevelId | null>(null);
   const [loading, setLoading] = useState(true);
+  const [recognizing, setRecognizing] = useState(false);
+  const [transcript, setTranscript] = useState("");
+  const [permissionGranted, setPermissionGranted] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -48,9 +56,80 @@ export default function PracticeScreen() {
     }, [])
   );
 
+  useEffect(() => {
+    const requestPermissions = async () => {
+      try {
+        const result =
+          await ExpoSpeechRecognitionModule.requestPermissionsAsync();
+
+        setPermissionGranted(result.granted);
+
+        if (!result.granted) {
+          setErrorMessage("음성 인식 권한을 허용해 주세요.");
+        }
+      } catch (error) {
+        console.error("Failed to request speech permissions", error);
+        setErrorMessage("권한을 확인하는 중 문제가 발생했습니다.");
+      }
+    };
+
+    requestPermissions();
+  }, []);
+
+  useSpeechRecognitionEvent("start", () => setRecognizing(true));
+  useSpeechRecognitionEvent("end", () => setRecognizing(false));
+  useSpeechRecognitionEvent("result", (event) => {
+    const latestTranscript = event.results
+      .map((item) => item.transcript)
+      .join(" ")
+      .trim();
+
+    setTranscript(latestTranscript);
+  });
+  useSpeechRecognitionEvent("error", (event) => {
+    setRecognizing(false);
+    setErrorMessage(event.message);
+  });
+
   const targetLevelLabel = loading
     ? "불러오는 중..."
     : (targetLevel ?? "미설정");
+
+  const handleToggleRecognition = async () => {
+    if (recognizing) {
+      ExpoSpeechRecognitionModule.stop();
+      return;
+    }
+
+    try {
+      setErrorMessage(null);
+      setTranscript("");
+
+      const permission = await ExpoSpeechRecognitionModule.getPermissionsAsync();
+
+      if (!permission.granted) {
+        const requested =
+          await ExpoSpeechRecognitionModule.requestPermissionsAsync();
+        setPermissionGranted(requested.granted);
+
+        if (!requested.granted) {
+          setErrorMessage("음성 인식과 마이크 접근을 허용해야 합니다.");
+          return;
+        }
+      } else {
+        setPermissionGranted(true);
+      }
+
+      ExpoSpeechRecognitionModule.start({
+        lang: "en-US",
+        interimResults: true,
+        continuous: false,
+      });
+    } catch (error) {
+      console.error("Failed to start speech recognition", error);
+      setErrorMessage("음성 인식을 시작할 수 없습니다.");
+    }
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -100,12 +179,29 @@ export default function PracticeScreen() {
         <View className="flex-1 items-center justify-center">
           <TouchableOpacity
             activeOpacity={0.9}
-            onPress={() => {}}
+            onPress={handleToggleRecognition}
             className="h-20 w-20 items-center justify-center rounded-full bg-primary-600 shadow-lg"
           >
             <IconSymbol name="mic.fill" size={32} color="#fff" />
           </TouchableOpacity>
-          <Text className="mt-3 text-sm text-gray-700">Tap to Answer</Text>
+          <Text className="mt-3 text-sm text-gray-700">
+            {recognizing ? "Listening..." : "Tap to Answer"}
+          </Text>
+
+          <View className="mt-6 w-full rounded-2xl border border-gray-200 bg-gray-50 p-4">
+            <Text className="text-base font-semibold text-gray-900">
+              인식된 텍스트
+            </Text>
+            <Text className="mt-2 text-sm text-gray-700">
+              {transcript ||
+                (permissionGranted
+                  ? "마이크 버튼을 누르고 말해보세요."
+                  : "권한을 허용해 주세요.")}
+            </Text>
+            {errorMessage ? (
+              <Text className="mt-2 text-xs text-red-500">{errorMessage}</Text>
+            ) : null}
+          </View>
         </View>
       </View>
     </SafeAreaView>
