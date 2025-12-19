@@ -1,0 +1,20 @@
+name: 🐛 버그 수정 (fix)
+about: 버그 수정 요청
+title: "[fix] "
+labels: ["fix"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: 버그 설명
+      description: 발생한 버그를 상세히 적어주세요.
+      placeholder: "어떤 재현 단계, 어떤 환경에서 문제가 발생하나요?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 재현 방법
+      description: 문제를 재현하는 순서를 적어주세요.
+      placeholder: "1. \n2. \n3. "
