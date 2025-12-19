@@ -74,28 +74,26 @@ export default function OnboardingScreen() {
                   onPress={() => setSelectedLevel(level.id)}
                   className={`relative mb-4 rounded-2xl border p-4 ${
                     isActive
-                      ? "border-blue-500 bg-blue-50"
+                      ? "border-primary-600 bg-primary-100"
                       : "border-gray-200 bg-white"
                   }`}
                   style={{ height: 120 }}
                 >
                   <View
                     className={`absolute right-3 top-3 h-5 w-5 rounded-full border-2 ${
-                      isActive
-                        ? "border-blue-600 bg-blue-600"
-                        : "border-gray-300"
+                      isActive ? "border-primary-600 bg-primary-600" : "border-gray-300"
                     }`}
                   />
                   <Text
                     className={`text-xl font-semibold ${
-                      isActive ? "text-blue-700" : "text-gray-900"
+                      isActive ? "text-primary-600" : "text-gray-900"
                     }`}
                   >
                     {level.title}
                   </Text>
                   <Text
                     className={`mt-2 text-sm leading-5 ${
-                      isActive ? "text-blue-700" : "text-gray-600"
+                      isActive ? "text-primary-600" : "text-gray-600"
                     }`}
                   >
                     {level.description}
@@ -112,7 +110,7 @@ export default function OnboardingScreen() {
             onPress={handleContinue}
             disabled={!selectedLevel || isSaving}
             className={`rounded-xl p-4 ${
-              selectedLevel ? "bg-blue-600" : "bg-gray-200"
+              selectedLevel ? "bg-primary-600" : "bg-gray-200"
             }`}
           >
             <Text

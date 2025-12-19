@@ -41,7 +41,7 @@ export default function HomeScreen() {
   return (
     <View className="flex-1 items-center justify-center bg-white px-6">
       <Text className="text-base text-gray-600">선택한 목표 등급</Text>
-      <Text className="mt-2 text-4xl font-bold text-blue-600">
+      <Text className="mt-2 text-4xl font-bold text-primary-600">
         {loading ? "불러오는 중..." : targetLevel ?? "미설정"}
       </Text>
       <Text className="mt-4 text-center text-sm text-gray-500">
@@ -52,9 +52,9 @@ export default function HomeScreen() {
       <TouchableOpacity
         activeOpacity={0.85}
         onPress={() => router.push("/onboarding")}
-        className="mt-8 w-full rounded-xl border border-blue-600 bg-white p-4"
+        className="mt-8 w-full rounded-xl border border-primary-600 bg-white p-4"
       >
-        <Text className="text-center text-base font-semibold text-blue-700">
+        <Text className="text-center text-base font-semibold text-primary-600">
           목표 등급 다시 선택하기
         </Text>
       </TouchableOpacity>
