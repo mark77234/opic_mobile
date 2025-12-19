@@ -3,7 +3,11 @@ import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
-import { LEVEL_OPTIONS, LevelId, TARGET_LEVEL_STORAGE_KEY } from "@/constants/opic";
+import {
+  LEVEL_OPTIONS,
+  LevelId,
+  TARGET_LEVEL_STORAGE_KEY,
+} from "@/constants/opic";
 
 export default function HomeScreen() {
   const [targetLevel, setTargetLevel] = useState<LevelId | null>(null);
@@ -15,8 +19,12 @@ export default function HomeScreen() {
 
       const loadLevel = async () => {
         try {
-          const storedLevel = await AsyncStorage.getItem(TARGET_LEVEL_STORAGE_KEY);
-          const isValidLevel = LEVEL_OPTIONS.some((option) => option.id === storedLevel);
+          const storedLevel = await AsyncStorage.getItem(
+            TARGET_LEVEL_STORAGE_KEY
+          );
+          const isValidLevel = LEVEL_OPTIONS.some(
+            (option) => option.id === storedLevel
+          );
 
           if (isMounted) {
             setTargetLevel(isValidLevel ? (storedLevel as LevelId) : null);
@@ -42,7 +50,7 @@ export default function HomeScreen() {
     <View className="flex-1 items-center justify-center bg-white px-6">
       <Text className="text-base text-gray-600">선택한 목표 등급</Text>
       <Text className="mt-2 text-4xl font-bold text-primary-600">
-        {loading ? "불러오는 중..." : targetLevel ?? "미설정"}
+        {loading ? "불러오는 중..." : (targetLevel ?? "미설정")}
       </Text>
       <Text className="mt-4 text-center text-sm text-gray-500">
         {targetLevel
