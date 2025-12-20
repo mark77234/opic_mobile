@@ -3,22 +3,19 @@ import { useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
-  ExpoSpeechRecognitionModule,
-  useSpeechRecognitionEvent,
-} from "expo-speech-recognition";
+  LEVEL_OPTIONS,
+  LevelId,
+  TARGET_LEVEL_STORAGE_KEY,
+} from "@/constants/opic";
+import { ANALYSIS_DURATION_MS, DEFAULT_TRANSCRIPT } from "@/constants/practice";
 import type {
   ExpoSpeechRecognitionErrorEvent,
   ExpoSpeechRecognitionResultEvent,
 } from "expo-speech-recognition";
 import {
-  ANALYSIS_DURATION_MS,
-  DEFAULT_TRANSCRIPT,
-} from "@/constants/practice";
-import {
-  LEVEL_OPTIONS,
-  LevelId,
-  TARGET_LEVEL_STORAGE_KEY,
-} from "@/constants/opic";
+  ExpoSpeechRecognitionModule,
+  useSpeechRecognitionEvent,
+} from "expo-speech-recognition";
 
 export type Phase = "idle" | "listening" | "analyzing" | "completed";
 
@@ -62,7 +59,8 @@ export const usePracticeLogic = () => {
 
   const ensureSpeechPermission = useCallback(async () => {
     try {
-      const permission = await ExpoSpeechRecognitionModule.getPermissionsAsync();
+      const permission =
+        await ExpoSpeechRecognitionModule.getPermissionsAsync();
 
       if (permission.granted) {
         setPermissionGranted(true);
@@ -130,12 +128,10 @@ export const usePracticeLogic = () => {
 
   const handleSpeechResult = useCallback(
     (event: ExpoSpeechRecognitionResultEvent) => {
-      const latestTranscript = event.results
-        .map((item) => item.transcript)
-        .join(" ")
-        .trim();
+      const lastResult =
+        event.results[event.results.length - 1]?.transcript ?? "";
 
-      setTranscript(latestTranscript);
+      setTranscript(lastResult.trim());
     },
     []
   );
