@@ -91,7 +91,7 @@ export default function PracticeScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <View className="flex-1 px-5 pb-10 pt-4">
+      <View className="flex-1 px-5 pt-4">
         <View className="flex-row items-start justify-between">
           <View>
             <Text className="text-2xl font-semibold text-gray-900">
