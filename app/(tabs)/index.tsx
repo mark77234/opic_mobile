@@ -1,139 +1,97 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { router, useFocusEffect } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { router } from "expo-router";
+import { useCallback, useEffect, useRef } from "react";
+import { Animated, Easing, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import {
-  ExpoSpeechRecognitionModule,
-  useSpeechRecognitionEvent,
-} from "expo-speech-recognition";
-import { IconSymbol } from "@/components/ui/icon-symbol";
-import {
-  LEVEL_OPTIONS,
-  LevelId,
-  TARGET_LEVEL_STORAGE_KEY,
-} from "@/constants/opic";
+import { AnalyzingSection } from "@/components/practice/analyzing-section";
+import { CompletedSection } from "@/components/practice/completed-section";
+import { ListeningSection } from "@/components/practice/listening-section";
+import { FEEDBACK_TIPS, QUESTION, SAMPLE_ANSWER } from "@/constants/practice";
+import { usePracticeLogic } from "@/hooks/use-practice-logic";
 
 export default function PracticeScreen() {
-  const [targetLevel, setTargetLevel] = useState<LevelId | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [recognizing, setRecognizing] = useState(false);
-  const [transcript, setTranscript] = useState("");
-  const [permissionGranted, setPermissionGranted] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const {
+    targetLevelLabel,
+    estimatedGrade,
+    displayedTranscript,
+    isListening,
+    isAnalyzing,
+    isCompleted,
+    handleToggleRecognition,
+    handleNextQuestion,
+  } = usePracticeLogic();
 
-  useFocusEffect(
-    useCallback(() => {
-      let isMounted = true;
+  const pulseAnim = useRef(new Animated.Value(0)).current;
+  const pulseAnimationRef = useRef<Animated.CompositeAnimation | null>(null);
 
-      const loadLevel = async () => {
-        try {
-          const storedLevel = await AsyncStorage.getItem(
-            TARGET_LEVEL_STORAGE_KEY
-          );
-          const isValidLevel = LEVEL_OPTIONS.some(
-            (option) => option.id === storedLevel
-          );
+  const stopPulseAnimation = useCallback(() => {
+    pulseAnimationRef.current?.stop();
+    pulseAnim.setValue(0);
+  }, [pulseAnim]);
 
-          if (isMounted) {
-            setTargetLevel(isValidLevel ? (storedLevel as LevelId) : null);
-          }
-        } catch (error) {
-          console.error("Failed to load target level", error);
-        } finally {
-          if (isMounted) {
-            setLoading(false);
-          }
-        }
-      };
+  const startPulseAnimation = useCallback(() => {
+    stopPulseAnimation();
 
-      loadLevel();
+    pulseAnimationRef.current = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 1200,
+          easing: Easing.out(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 0,
+          duration: 0,
+          useNativeDriver: true,
+        }),
+      ])
+    );
 
-      return () => {
-        isMounted = false;
-      };
-    }, [])
-  );
+    pulseAnimationRef.current.start();
+  }, [pulseAnim, stopPulseAnimation]);
 
   useEffect(() => {
-    const requestPermissions = async () => {
-      try {
-        const result =
-          await ExpoSpeechRecognitionModule.requestPermissionsAsync();
-
-        setPermissionGranted(result.granted);
-
-        if (!result.granted) {
-          setErrorMessage("음성 인식 권한을 허용해 주세요.");
-        }
-      } catch (error) {
-        console.error("Failed to request speech permissions", error);
-        setErrorMessage("권한을 확인하는 중 문제가 발생했습니다.");
-      }
-    };
-
-    requestPermissions();
-  }, []);
-
-  useSpeechRecognitionEvent("start", () => setRecognizing(true));
-  useSpeechRecognitionEvent("end", () => setRecognizing(false));
-  useSpeechRecognitionEvent("result", (event) => {
-    const latestTranscript = event.results
-      .map((item) => item.transcript)
-      .join(" ")
-      .trim();
-
-    setTranscript(latestTranscript);
-  });
-  useSpeechRecognitionEvent("error", (event) => {
-    setRecognizing(false);
-    setErrorMessage(event.message);
-  });
-
-  const targetLevelLabel = loading
-    ? "불러오는 중..."
-    : (targetLevel ?? "미설정");
-
-  const handleToggleRecognition = async () => {
-    if (recognizing) {
-      ExpoSpeechRecognitionModule.stop();
-      return;
+    if (isListening) {
+      startPulseAnimation();
+    } else {
+      stopPulseAnimation();
     }
 
-    try {
-      setErrorMessage(null);
-      setTranscript("");
+    return stopPulseAnimation;
+  }, [isListening, startPulseAnimation, stopPulseAnimation]);
 
-      const permission = await ExpoSpeechRecognitionModule.getPermissionsAsync();
+  useEffect(() => stopPulseAnimation, [stopPulseAnimation]);
 
-      if (!permission.granted) {
-        const requested =
-          await ExpoSpeechRecognitionModule.requestPermissionsAsync();
-        setPermissionGranted(requested.granted);
-
-        if (!requested.granted) {
-          setErrorMessage("음성 인식과 마이크 접근을 허용해야 합니다.");
-          return;
-        }
-      } else {
-        setPermissionGranted(true);
-      }
-
-      ExpoSpeechRecognitionModule.start({
-        lang: "en-US",
-        interimResults: true,
-        continuous: false,
-      });
-    } catch (error) {
-      console.error("Failed to start speech recognition", error);
-      setErrorMessage("음성 인식을 시작할 수 없습니다.");
+  const renderContent = () => {
+    if (isCompleted) {
+      return (
+        <CompletedSection
+          estimatedGrade={estimatedGrade}
+          displayedTranscript={displayedTranscript}
+          feedbackTips={FEEDBACK_TIPS}
+          sampleAnswer={SAMPLE_ANSWER}
+          onNextQuestion={handleNextQuestion}
+        />
+      );
     }
+
+    if (isAnalyzing) {
+      return <AnalyzingSection />;
+    }
+
+    return (
+      <ListeningSection
+        pulseAnim={pulseAnim}
+        isListening={isListening}
+        onToggle={handleToggleRecognition}
+      />
+    );
   };
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <View className="flex-1 px-5 pb-10 pt-4">
+      <View className="flex-1 px-5 pt-4">
         <View className="flex-row items-start justify-between">
           <View>
             <Text className="text-2xl font-semibold text-gray-900">
@@ -169,40 +127,14 @@ export default function PracticeScreen() {
 
         <View className="mt-6 rounded-2xl border border-gray-300 bg-white p-5 ">
           <Text className="self-start rounded-full bg-primary-100 px-3 py-1 text-base font-semibold uppercase tracking-wide text-primary-600">
-            Random
+            {QUESTION.category}
           </Text>
           <Text className="mt-3 text-2xl font-semibold text-gray-900">
-            Tell me a little bit about yourself.
+            {QUESTION.prompt}
           </Text>
         </View>
 
-        <View className="flex-1 items-center justify-center">
-          <TouchableOpacity
-            activeOpacity={0.9}
-            onPress={handleToggleRecognition}
-            className="h-20 w-20 items-center justify-center rounded-full bg-primary-600 shadow-lg"
-          >
-            <IconSymbol name="mic.fill" size={32} color="#fff" />
-          </TouchableOpacity>
-          <Text className="mt-3 text-sm text-gray-700">
-            {recognizing ? "Listening..." : "Tap to Answer"}
-          </Text>
-
-          <View className="mt-6 w-full rounded-2xl border border-gray-200 bg-gray-50 p-4">
-            <Text className="text-base font-semibold text-gray-900">
-              인식된 텍스트
-            </Text>
-            <Text className="mt-2 text-sm text-gray-700">
-              {transcript ||
-                (permissionGranted
-                  ? "마이크 버튼을 누르고 말해보세요."
-                  : "권한을 허용해 주세요.")}
-            </Text>
-            {errorMessage ? (
-              <Text className="mt-2 text-xs text-red-500">{errorMessage}</Text>
-            ) : null}
-          </View>
-        </View>
+        {renderContent()}
       </View>
     </SafeAreaView>
   );
