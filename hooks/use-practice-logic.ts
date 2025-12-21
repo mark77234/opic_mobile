@@ -43,7 +43,7 @@ export const usePracticeLogic = () => {
     loading: loadingQuestions,
     error: questionError,
     reload,
-  } = useQuestions();
+  } = useQuestions(targetLevel);
 
   const loadTargetLevel = useCallback(async () => {
     const storedLevel = await AsyncStorage.getItem(TARGET_LEVEL_STORAGE_KEY);
