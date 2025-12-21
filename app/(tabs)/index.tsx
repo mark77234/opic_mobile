@@ -1,4 +1,4 @@
-import { router, type Href } from "expo-router";
+import { router } from "expo-router";
 import { useCallback, useEffect, useRef } from "react";
 import {
   ActivityIndicator,
@@ -20,7 +20,6 @@ import {
 import { usePracticeLogic } from "@/hooks/use-practice-logic";
 
 export default function PracticeScreen() {
-  const filterRoute = "/question-filters" as Href;
   const {
     targetLevelLabel,
     targetLevel,
@@ -133,15 +132,6 @@ export default function PracticeScreen() {
           <Text className="mt-2 text-sm text-gray-600">
             카테고리/태그/레벨 필터를 조정한 뒤 다시 시도하세요.
           </Text>
-          <TouchableOpacity
-            activeOpacity={0.9}
-            onPress={() => router.push(filterRoute)}
-            className="mt-4 rounded-full bg-primary-600 px-4 py-2"
-          >
-            <Text className="text-sm font-semibold text-white">
-              필터 변경하기
-            </Text>
-          </TouchableOpacity>
         </View>
       );
     }
@@ -188,26 +178,15 @@ export default function PracticeScreen() {
               )}
             </View>
           </View>
-          <View className="flex-row gap-2">
-            <TouchableOpacity
-              activeOpacity={0.85}
-              onPress={() => router.push(filterRoute)}
-              className="rounded-full border border-primary-200 bg-primary-50 px-4 py-2 "
-            >
-              <Text className="text-sm font-semibold text-primary-700">
-                필터 변경
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              activeOpacity={0.85}
-              onPress={handleSkip}
-              className="rounded-full border border-gray-300 bg-white px-4 py-2 "
-            >
-              <Text className="text-base font-semibold text-gray-700">
-                Skip Question
-              </Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={handleSkip}
+            className="rounded-full border border-gray-300 bg-white px-4 py-2 "
+          >
+            <Text className="text-base font-semibold text-gray-700">
+              Skip Question
+            </Text>
+          </TouchableOpacity>
         </View>
 
         <TouchableOpacity
