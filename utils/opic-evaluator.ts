@@ -70,15 +70,15 @@ const countFillerWords = (text: string) => {
 // 총점 기준: 위에서부터 "점수 >= min"을 만족하면 바로 해당 등급으로 판정됩니다.
 // 원하는 난이도로 숫자나 순서를 마음껏 조정하세요.
 const LEVEL_THRESHOLDS: { min: number; level: LevelId }[] = [
-  { level: "AL", min: 0.7 },
-  { level: "IH", min: 0.65 },
-  { level: "IM3", min: 0.65 },
-  { level: "IM2", min: 0.6 },
-  { level: "IM1", min: 0.5 },
-  { level: "IL", min: 0.4 },
-  { level: "NH", min: 0.3 },
-  { level: "NM", min: 0.2 },
-  { level: "NL", min: 0.1 },
+  { level: "AL", min: 0.75 }, // 85점 이상 (매우 엄격: 유창성+복합문)
+  { level: "IH", min: 0.7 }, // 72점 이상 (상급: 시제 일관성 및 풍부한 어휘)
+  { level: "IM3", min: 0.68 }, // 65점 이상 (중상급: 문단 구성 가능)
+  { level: "IM2", min: 0.65 },
+  { level: "IM1", min: 0.6 },
+  { level: "IL", min: 0.5 },
+  { level: "NH", min: 0.4 },
+  { level: "NM", min: 0.3 },
+  { level: "NL", min: 0.2 },
 ];
 
 const mapTotalScoreToLevel = (score: number): LevelId => {
@@ -86,25 +86,20 @@ const mapTotalScoreToLevel = (score: number): LevelId => {
   return hit ? (hit.level as LevelId) : "NL";
 };
 
-// 등급 체감 강도를 바꾸려면 아래 숫자만 수정하세요.
-// - wordTarget/lengthTarget: 단어 수와 평균 문장 길이가 이 값에 가까울수록 만점
-// - weights: 단어 수/문장 길이에 줄 비중
-// - penalties: 반복, 군더더기, 짧은 문장 감점 비율
-// - scoreNudge: 최종 총점을 올리거나 내릴 때 사용
 const SCORING_CONFIG = {
-  wordTarget: 220, // 단어 수 타깃 (예: IH 예시 1분 30초 발화량 근사)
-  lengthTarget: 16, // 평균 문장 길이 타깃 (단어 기준)
-  minLengthFloor: 6, // 이 값보다 문장이 짧으면 감점이 시작됩니다.
+  wordTarget: 240, // 2025 AL 기준 발화량 상향 (충분한 상세 설명 필요)
+  lengthTarget: 18, // 문장당 평균 단어 수 (복문 사용 능력 측정)
+  minLengthFloor: 7, // 문장이 너무 짧으면 감점
   weights: {
-    word: 0.55,
-    length: 0.45,
+    word: 0.5, // 단어 수 비중 약간 하향
+    length: 0.5, // 문장 구조(길이) 비중 상향 (복잡성 평가)
   },
   penalties: {
-    repetition: 0.08,
-    filler: 0.07,
-    shortSentence: 0.07,
+    repetition: 0.12, // 반복 감점 강화 (어휘 다양성 평가)
+    filler: 0.05, // filler는 자연스러움의 척도이므로 감점 폭 완화
+    shortSentence: 0.1, // 짧은 문장 위주 답변 시 감점 강화
   },
-  scoreNudge: 0, // +0.03이면 등급이 한 단계 관대해지고, -0.03이면 엄격해집니다.
+  scoreNudge: -0.02, // 전체적으로 엄격한 평가를 위해 약간 하향 조정
 };
 
 export const evaluateTranscript = (
