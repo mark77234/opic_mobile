@@ -9,7 +9,9 @@ type CompletedSectionProps = {
   feedbackMessage: string;
   sampleAnswer: { en: string; ko: string };
   targetLevel?: LevelId | null;
-  onNextQuestion: () => void;
+  category?: string | null;
+  tags?: string[];
+  onNextQuestion: () => void | Promise<void>;
 };
 
 export function CompletedSection({
@@ -18,6 +20,8 @@ export function CompletedSection({
   feedbackMessage,
   sampleAnswer,
   targetLevel,
+  category,
+  tags,
   onNextQuestion,
 }: CompletedSectionProps) {
   const { level, wordCount, sentenceCount, reasonSummary } = evaluation;
@@ -43,6 +47,23 @@ export function CompletedSection({
               <Text className="mt-1 text-sm leading-5 text-amber-50">
                 {reasonSummary}
               </Text>
+              {category && (
+                <Text className="mt-3 text-xs font-semibold uppercase tracking-wide text-amber-100">
+                  Category: {category}
+                </Text>
+              )}
+              {tags && tags.length > 0 && (
+                <View className="mt-1 flex-row flex-wrap gap-2">
+                  {tags.map((tag) => (
+                    <Text
+                      key={tag}
+                      className="rounded-full bg-amber-200 px-2 py-1 text-[11px] font-semibold text-amber-900"
+                    >
+                      #{tag}
+                    </Text>
+                  ))}
+                </View>
+              )}
             </View>
             <View className="items-end justify-center">
               <TouchableOpacity
@@ -107,6 +128,9 @@ export function CompletedSection({
         <View className="mt-4 rounded-2xl border border-emerald-100 bg-emerald-50 p-4 shadow-sm">
           <Text className="text-xl font-semibold text-emerald-900">
             샘플 답안 ({targetLevel ?? level})
+          </Text>
+          <Text className="mt-1 text-xs font-semibold text-emerald-700">
+            Firestore exampleAnswer 기반
           </Text>
           <Text className="mt-3 text-base leading-6 text-emerald-900">
             {sampleAnswer.en}

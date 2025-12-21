@@ -17,6 +17,21 @@ export type LevelOption = {
 
 export const LEVEL_OPTIONS: LevelOption[] = [
   {
+    id: "NL",
+    title: "NL",
+    description: "단어 위주로 의사 표현을 시작하는 단계",
+  },
+  {
+    id: "NM",
+    title: "NM",
+    description: "짧은 문장으로 기본 응답이 가능한 단계",
+  },
+  {
+    id: "NH",
+    title: "NH",
+    description: "간단한 설명과 묘사가 가능한 단계",
+  },
+  {
     id: "IL",
     title: "IL",
     description: "기본적인 일상 대화를 짧게 이어갈 수 있는 수준",

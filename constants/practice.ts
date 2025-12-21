@@ -55,15 +55,3 @@ export const SAMPLE_ANSWER_BY_LEVEL: Record<LevelId, { en: string; ko: string }>
     ko: "영어 실력을 높이기 위해 입력과 출력을 섞은 루틴을 만들었어요. 아침에는 뉴스 기사를 읽고 요약하며, 저녁에는 같은 주제를 연결어와 비교 표현을 넣어 설명하면서 녹음합니다. 녹음을 주 단위로 다시 들으며 피드백하니 성과가 보입니다.",
   },
 };
-
-export type Question = {
-  category: string;
-  prompt: string;
-  suggestedLevel?: LevelId;
-};
-
-export const QUESTION: Question = {
-  category: "Random",
-  prompt: "Tell me a little bit about yourself.",
-  suggestedLevel: "IM2",
-};
