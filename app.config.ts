@@ -44,6 +44,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       dark: ICONS.iosDark,
       tinted: ICONS.iosTinted,
     },
+    infoPlist: {
+      NSPhotoLibraryUsageDescription:
+        "사진을 선택해 프로필이나 학습 자료로 사용할 수 있도록 사진 라이브러리 접근 권한이 필요합니다.",
+    },
   },
 
   /**
