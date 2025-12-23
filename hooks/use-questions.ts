@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { signInAnonymously } from "firebase/auth";
 import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
@@ -50,12 +50,13 @@ export const useQuestions = (levelFilter?: LevelId | null) => {
   const [questions, setQuestions] = useState<QuestionDoc[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const hasSeededRef = useRef(false);
   // Temporary switch: disable Firestore access after seeding; use local questions.json.
   // Flip via EXPO_PUBLIC_FIRESTORE_DISABLED when you want to read/write Firestore again.
   const FIRESTORE_DISABLED =
     process.env.EXPO_PUBLIC_FIRESTORE_DISABLED === "true";
   const shouldAutoSeed = useMemo(
-    () => process.env.EXPO_PUBLIC_ENABLE_SEED === "false",
+    () => process.env.EXPO_PUBLIC_ENABLE_SEED === "true",
     []
   );
 
@@ -130,12 +131,18 @@ export const useQuestions = (levelFilter?: LevelId | null) => {
 
       console.log("[Questions] Firestore snapshot size:", snapshot.size);
 
-      if (snapshot.empty && shouldAutoSeed && !levelFilter) {
+      const shouldSeedNow =
+        shouldAutoSeed && !FIRESTORE_DISABLED && !levelFilter;
+
+      if (shouldSeedNow && !hasSeededRef.current) {
         await ensureSeedAuth();
         console.log(
-          "[Questions] Firestore empty. Auto seeding from questions.json..."
+          snapshot.empty
+            ? "[Questions] Firestore empty. Seeding from questions.json..."
+            : "[Questions] Firestore has data. Seeding to sync questions.json..."
         );
         const result = await seedQuestions();
+        hasSeededRef.current = true;
         console.log("[Questions] Seed result:", result);
         const seededSnapshot = await getDocs(baseQuery);
         console.log(
@@ -144,9 +151,7 @@ export const useQuestions = (levelFilter?: LevelId | null) => {
         );
 
         if (!seededSnapshot.empty) {
-          setQuestions(
-            scopeToLevel(seededSnapshot.docs.map(mapDocToQuestion))
-          );
+          setQuestions(scopeToLevel(seededSnapshot.docs.map(mapDocToQuestion)));
           setLoading(false);
           return;
         }
@@ -164,7 +169,9 @@ export const useQuestions = (levelFilter?: LevelId | null) => {
     } catch (err) {
       console.error("Failed to load questions", err);
       // Fallback to local JSON so practice can still run offline/dev.
-      const localSeed = scopeToLevel(buildSeedPayloads().map(mapSeedToQuestion));
+      const localSeed = scopeToLevel(
+        buildSeedPayloads().map(mapSeedToQuestion)
+      );
       setQuestions(localSeed);
       setError(
         "Firestore에서 문항을 불러오지 못했습니다. 로컬 questions.json을 사용합니다. (로그 확인)"
