@@ -100,10 +100,8 @@ export default function PracticeScreen() {
       const feedbackMessage = FEEDBACK_BY_LEVEL[evaluationResult.level];
       const levelForSample = targetLevel ?? evaluationResult.level;
       const fallbackSample = SAMPLE_ANSWER_BY_LEVEL[levelForSample];
-      const sampleAnswer = {
-        en: currentQuestion?.exampleAnswer ?? fallbackSample.en,
-        ko: fallbackSample.ko,
-      };
+      const sampleAnswer =
+        currentQuestion?.exampleAnswer?.trim() || fallbackSample.en;
 
       return (
         <CompletedSection
