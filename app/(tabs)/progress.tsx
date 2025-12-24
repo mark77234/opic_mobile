@@ -1,4 +1,4 @@
-import { useFocusEffect, router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -52,9 +52,7 @@ export default function ProgressScreen() {
         contentContainerClassName="flex-grow px-6 pb-10 pt-6"
         showsVerticalScrollIndicator={false}
       >
-        <Text className="text-2xl font-semibold text-gray-900">
-          Your Progress
-        </Text>
+        <Text className="text-2xl font-semibold text-gray-900">통계</Text>
 
         {loading ? (
           <View className="mt-6 min-h-[140px] items-center justify-center gap-2 rounded-2xl border border-gray-100 bg-gray-50 p-6">
@@ -108,7 +106,7 @@ export default function ProgressScreen() {
 
             <View className="mt-10">
               <Text className="text-xl font-semibold text-gray-900">
-                Recent Attempts
+                최근 기록
               </Text>
               {history.length === 0 ? (
                 <View className="mt-4 rounded-2xl border-2 border-dashed border-gray-200 bg-white p-5">

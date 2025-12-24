@@ -151,10 +151,10 @@ export default function PracticeScreen() {
         <View className="flex-row items-start justify-between">
           <View>
             <Text className="text-2xl font-semibold text-gray-900">
-              Practice Mode
+              연습 하기
             </Text>
             <View className="mt-1 flex-row items-center gap-2">
-              <Text className="text-base text-gray-600">Targeting:</Text>
+              <Text className="text-base text-gray-600">목표등급:</Text>
               <Text className="text-base font-semibold text-primary-600">
                 {targetLevelLabel}
               </Text>
@@ -184,7 +184,7 @@ export default function PracticeScreen() {
             className="rounded-full border border-gray-300 bg-white px-4 py-2 "
           >
             <Text className="text-base font-semibold text-gray-700">
-              Skip Question
+              다른 질문
             </Text>
           </TouchableOpacity>
         </View>
@@ -203,7 +203,9 @@ export default function PracticeScreen() {
           {questionsLoading ? (
             <View className="items-center justify-center gap-2 py-8">
               <ActivityIndicator color="#2563eb" />
-              <Text className="text-sm text-gray-600">문제를 불러오는 중입니다...</Text>
+              <Text className="text-sm text-gray-600">
+                문제를 불러오는 중입니다...
+              </Text>
             </View>
           ) : (
             <>
@@ -227,7 +229,9 @@ export default function PracticeScreen() {
                 </View>
               ) : null}
               {questionError && (
-                <Text className="mt-3 text-sm text-red-600">{questionError}</Text>
+                <Text className="mt-3 text-sm text-red-600">
+                  {questionError}
+                </Text>
               )}
             </>
           )}
