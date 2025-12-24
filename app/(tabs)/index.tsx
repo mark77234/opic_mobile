@@ -13,6 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { AnalyzingSection } from "@/components/practice/analyzing-section";
 import { CompletedSection } from "@/components/practice/completed-section";
 import { ListeningSection } from "@/components/practice/listening-section";
+import { IconSymbol } from "@/components/ui/icon-symbol";
 import {
   FEEDBACK_BY_LEVEL,
   SAMPLE_ANSWER_BY_LEVEL,
@@ -32,6 +33,7 @@ export default function PracticeScreen() {
     isListening,
     isAnalyzing,
     isCompleted,
+    errorMessage,
     handleToggleRecognition,
     handleSkipQuestion,
     handleNextQuestion,
@@ -199,9 +201,9 @@ export default function PracticeScreen() {
 
         <View className="mt-6 rounded-2xl border border-gray-300 bg-white p-5 ">
           {questionsLoading ? (
-            <View className="items-center justify-center py-2">
+            <View className="items-center justify-center gap-2 py-8">
               <ActivityIndicator color="#2563eb" />
-              <Text className="mt-2 text-sm text-gray-600">문제를 불러오는 중입니다...</Text>
+              <Text className="text-sm text-gray-600">문제를 불러오는 중입니다...</Text>
             </View>
           ) : (
             <>
@@ -230,6 +232,28 @@ export default function PracticeScreen() {
             </>
           )}
         </View>
+
+        {errorMessage && (
+          <View className="mt-3 flex-row items-start gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
+            <IconSymbol
+              name="exclamationmark.triangle.fill"
+              size={18}
+              color="#b45309"
+              style={{ marginTop: 2 }}
+            />
+            <View className="flex-1">
+              <Text className="text-sm font-semibold text-amber-900">
+                음성 인식이 잠시 멈췄어요
+              </Text>
+              <Text className="mt-1 text-xs leading-5 text-amber-800">
+                {errorMessage}
+              </Text>
+              <Text className="mt-1 text-[11px] font-semibold text-amber-900">
+                마이크를 휴대폰 가까이에 대고 이어서 쭉 말씀해 주세요.
+              </Text>
+            </View>
+          </View>
+        )}
 
         {renderContent()}
       </View>

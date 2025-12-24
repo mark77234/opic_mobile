@@ -26,6 +26,10 @@ export default function RootLayout() {
           options={{ headerShown: false }}
         />
         <Stack.Screen
+          name="history/[id]"
+          options={{ title: "연습 기록" }}
+        />
+        <Stack.Screen
           name="question-filters"
           options={{ title: "Question Filters" }}
         />
