@@ -24,7 +24,7 @@ export function CompletedSection({
   tags,
   onNextQuestion,
 }: CompletedSectionProps) {
-  const { level, wordCount, sentenceCount, reasonSummary } = evaluation;
+  const { level, wordCount, sentenceCount } = evaluation;
 
   return (
     <View className="mt-6 flex-1">
